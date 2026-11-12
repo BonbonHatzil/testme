@@ -1,0 +1,15 @@
+[project]
+name = "testme"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.pylint.main]
+py-version = "3.12"
+
+[tool.pylint."messages control"]
+# Test functions are self-describing; don't demand a docstring on each one.
+disable = ["missing-function-docstring"]
